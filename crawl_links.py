@@ -13,7 +13,7 @@ class Cralwer:
         """
         counter = 0
         discovered_urls = set()
-        while self.urls_to_visit and counter < 2:
+        while self.urls_to_visit and counter < 1:
             url = self.urls_to_visit.pop(0)
             response = requests.get(url=url)
             response.raise_for_status()  # Check if the request was successful
@@ -27,6 +27,18 @@ class Cralwer:
                     self.urls_to_visit.append(url)
             counter += 1
         return discovered_urls
+    
+    def extract_html(self, url):
+        """
+        Extract HTML and write to a file
+        """
+        response = requests.get(url=url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        title = soup.title.string
+        with open("html/" + title + '.html', 'w') as file:
+            file.write(soup.prettify())
+
     
     def write_to_file(self, urls):
         """
