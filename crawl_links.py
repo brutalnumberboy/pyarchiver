@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 class Cralwer:
     def __init__(self):
-        urls_to_visit = ['https://www.google.com']
+        urls_to_visit = ['https://wallhaven.cc/w/gwjq3d']
         self.urls_to_visit = urls_to_visit
 
 
@@ -12,7 +12,7 @@ class Cralwer:
         Crawl a given website and discover links.
         """
         counter = 0
-        discovered_urls = set()
+        discovered_urls = []
         while self.urls_to_visit and counter < 1:
             url = self.urls_to_visit.pop(0)
             response = requests.get(url=url)
@@ -23,7 +23,7 @@ class Cralwer:
                 url = link.get('href')
                 if url.startswith('http' or 'https'):
                     if url not in discovered_urls:
-                        discovered_urls.add(url)
+                        discovered_urls.append(url)
                     self.urls_to_visit.append(url)
             counter += 1
         return discovered_urls
@@ -36,7 +36,7 @@ class Cralwer:
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         title = soup.title.string
-        with open("html/" + title + '.html', 'w') as file:
+        with open("flask/templates/" + title + '.html', 'w') as file:
             file.write(soup.prettify())
 
     

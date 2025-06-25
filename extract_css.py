@@ -20,7 +20,7 @@ def extract_css(url):
             if "css" in css_url:
                 response = requests.get(css_url, stream=True)
                 print(cssutils.parseString(response.text))
-                with open("styles/" + css_url.split("/")[-1], "wb") as file:
+                with open("flask/static/styles/" + css_url.split("/")[-1], "wb") as file:
                     file.write(response.content)
     
     for style in soup.find_all("style"):
