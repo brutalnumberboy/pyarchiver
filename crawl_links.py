@@ -1,11 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+from urllib.parse import urljoin
+import cssutils
+
 
 class Cralwer:
-    def __init__(self):
-        urls_to_visit = ['https://www.google.com']
-        self.urls_to_visit = urls_to_visit
+    def __init__(self, urls):
+        self.urls_to_visit = urls
 
 
     def crawl_links(self):
@@ -29,10 +31,11 @@ class Cralwer:
             counter += 1
         return discovered_urls
     
-    def extract_html(self, url):
+    def extract_html(self, urls):
         """
         Extract HTML and write to a file
         """
+        url = urls.pop()
         response = requests.get(url=url)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -55,4 +58,49 @@ class Cralwer:
 
         print(f"Discovered {len(urls)} URLs. Check urls.txt for the list.")
 
+    def extract_css(self, urls):
+        """
+        Extracts external and inline CSS.
+        """
+        css_files = []
+        inline_styles = []
+        url = urls.pop()
+        response = requests.get(url=url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        if response.status_code == 200:
+            os.makedirs("styles", exist_ok=True)
+            for css in soup.find_all("link"):
+                # find external css files
+                if css.attrs.get("href"):
+                    # if the link tag has the 'href' attribute
+                    css_url = urljoin(url, css.attrs.get("href"))
+                    if "css" in css_url:
+                        response = requests.get(css_url, stream=True)
+                        print(cssutils.parseString(response.text))
+                        with open("styles/" + css_url.split("/")[-1], "wb") as file:
+                            file.write(response.content)
+        
+        for style in soup.find_all("style"):
+            # find inline css 
+            if style.string:
+                inline_styles.append(cssutils.parseStyle(style.string))
+        print(css_files)
+
+
+    def get_images(self, urls):
+        counter = 0
+        while urls and counter < 2:
+            url = urls.pop()
+            response = requests.get(url=url, stream=True)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            images = soup.find_all('img')
+            if response.status_code == 200: 
+                os.makedirs("media", exist_ok=True)
+                for img in images:
+                    img_url = img.get('src')
+                    if img_url and (img_url.startswith('http') or img_url.startswith('https')):
+                        response = requests.get(img_url, stream=True)
+                        with open("media/" + img_url.split("/")[-1], "wb") as file:
+                            file.write(response.content)
+                    print(f"Image URL: {img_url}")
     
