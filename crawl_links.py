@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import os
 
 class Cralwer:
     def __init__(self):
@@ -36,8 +37,10 @@ class Cralwer:
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         title = soup.title.string
-        with open("html/" + title + '.html', 'w') as file:
-            file.write(soup.prettify())
+        if response.status_code == 200:
+            os.makedirs("html", exist_ok=True)
+            with open("html/" + title + '.html', 'w') as file:
+                file.write(soup.prettify())
 
     
     def write_to_file(self, urls):
