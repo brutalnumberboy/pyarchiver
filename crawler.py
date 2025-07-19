@@ -6,8 +6,9 @@ import cssutils
 
 
 class Cralwer:
-    def __init__(self, urls):
+    def __init__(self, urls, depth=1):
         self.urls_to_visit = urls
+        self.depth = depth
 
 
     def crawl_links(self):
@@ -16,7 +17,7 @@ class Cralwer:
         """
         counter = 0
         discovered_urls = set()
-        while self.urls_to_visit and counter < 1:
+        while self.urls_to_visit and counter < self.depth:
             url = self.urls_to_visit.pop(0)
             response = requests.get(url=url)
             response.raise_for_status()  # Check if the request was successful
@@ -89,7 +90,7 @@ class Cralwer:
 
     def get_images(self, urls):
         counter = 0
-        while urls and counter < 2:
+        while urls and counter < self.depth:
             url = urls.pop()
             response = requests.get(url=url, stream=True)
             soup = BeautifulSoup(response.text, 'html.parser')
